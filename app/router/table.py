@@ -7,16 +7,11 @@ router = APIRouter(
     tags=["table"],
 )
 
-@router.get("/")
-async def get_league_table(scraper = Depends(get_scraper)): ## returns an ordered list of team dicttionaries
-        ## navigate to the league table page
+async def parse_table(scraper = Depends(get_scraper)):
     page = await scraper.goto("/en/tables?competition=8&season=2025&round=L_1&matchweek=-1&ha=-1")
     table = await page.inner_html(".standings-table")
     rows = await page.query_selector_all("tbody tr .standings-row__container")
-    print(type(rows))
     table = []
-    print(len(rows))
-    print((await rows[0].inner_text()).split("\n"))
     for row in rows:
         row_data = (await row.inner_text()).split("\n")
         team_data = {
@@ -33,3 +28,15 @@ async def get_league_table(scraper = Depends(get_scraper)): ## returns an ordere
         }
         table.append(team_data)
     return {'table': table}
+
+@router.get("/")
+async def get_league_table(scraper = Depends(get_scraper)): ## returns an ordered list of team dicttionaries
+    return await parse_table(scraper)
+
+@router.get("/{team_name}")
+async def get_team_table_info(team_name: str, scraper = Depends(get_scraper)): ## returns
+    table = await parse_table(scraper)
+    for team in table['table']:
+        if team['team'].lower() == team_name.lower():
+            return team
+    return {"error": "Team not found"}

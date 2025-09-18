@@ -7,10 +7,6 @@ router = APIRouter(
     tags=["clubs"],
 )
 
-@router.get("/{name}/table_info")
-async def get_club_table_info(name: str, scraper: PlaywrightService = Depends(get_scraper)):
-    pass
-
 @router.get("/{name}/players")
 async def get_club_players(name: str, scraper: PlaywrightService = Depends(get_scraper)):
     pass
