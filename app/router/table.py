@@ -6,6 +6,6 @@ router = APIRouter(
     tags=["table"],
 )
 
-@router.get("/", scraper = Depends(get_scraper))
-async def get_league_table():
+@router.get("/")
+async def get_league_table(scraper = Depends(get_scraper)):
     return {"message": "League table data"}
