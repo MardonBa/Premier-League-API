@@ -9,11 +9,13 @@ router = APIRouter(
 
 async def parse_table(scraper = Depends(get_scraper)):
     page = await scraper.goto("/en/tables?competition=8&season=2025&round=L_1&matchweek=-1&ha=-1")
-    table = await page.inner_html(".standings-table")
-    rows = await page.query_selector_all("tbody tr .standings-row__container")
+
+    rows_locator = page.locator("tbody tr .standings-row__container")
+    await rows_locator.first.wait_for(timeout=5000)
+    rows = await rows_locator.all_inner_texts()
     table = []
     for row in rows:
-        row_data = (await row.inner_text()).split("\n")
+        row_data = row.split("\n")
         team_data = {
             'position': row_data[0],
             'team': row_data[1],
