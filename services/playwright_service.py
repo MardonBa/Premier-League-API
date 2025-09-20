@@ -8,6 +8,7 @@ class PlaywrightService:
         self.browser = None
         self.context = None
         self.page = None
+        self.initial_render = True
 
     async def init(self):
         if not self.browser:
@@ -21,6 +22,11 @@ class PlaywrightService:
             raise RuntimeError("Playwright not initialized. Call init() first.")
         url = urljoin(self.root_url, path)
         await self.page.goto(url, wait_until="domcontentloaded")
+        
+        if self.initial_render:
+            cookie_button = self.page.locator("button:has-text('Accept All Cookies')")
+            await cookie_button.click()
+            self.initial_render = False
         return self.page
 
     async def close(self):
