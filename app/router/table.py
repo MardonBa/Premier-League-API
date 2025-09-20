@@ -11,7 +11,7 @@ async def parse_table(scraper = Depends(get_scraper)):
     page = await scraper.goto("/en/tables?competition=8&season=2025&round=L_1&matchweek=-1&ha=-1")
 
     rows_locator = page.locator("tbody tr .standings-row__container")
-    await rows_locator.first.wait_for(timeout=5000)
+    await rows_locator.first.wait_for(timeout=30000)
     rows = await rows_locator.all_inner_texts()
     table = []
     for row in rows:

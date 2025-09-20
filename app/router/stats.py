@@ -1,19 +1,42 @@
 from fastapi import APIRouter, Depends
 from .deps import get_scraper
 from services.playwright_service import PlaywrightService
+import math
 
 router = APIRouter(
     prefix="/stats",
     tags=["stats"],
 )
 
-@router.get("/club/{stat_type}")
-async def get_club_stats(stat_type: str, scraper: PlaywrightService = Depends(get_scraper)):
-    pass
+async def get_stats(scraper, category, stat_type, top_n):
+    top_n = 10 if top_n == None else top_n
+    num_page_changes = math.floor((top_n-1) / 10)
 
-@router.get("/players/{stat_type}")
-async def get_player_stats(stat_type: str, scraper: PlaywrightService = Depends(get_scraper)):
-    pass
+    data = []
+    page = await scraper.goto(f'/en/stats/top/{category}?statMetric={stat_type}&season=2025')
+    for i in range(num_page_changes+1):
+        data_locator = page.locator('tbody tr td.stats-table__stat-wrapper')
+        await data_locator.first.wait_for(timeout=30000)
+        cur_data = await data_locator.all_inner_texts()
+        cur_data = [d.split("\n") for d in cur_data]
+        cur_data = [{
+            'position': int(d[0]),
+            f'{category}_name': d[1],
+            f'{stat_type}': int(d[2]) if category == 'clubs' else int(d[3]) if d[3].isdigit() else int(d[4])
+        } for d in cur_data]
+        data.extend(cur_data)
+        locator = page.locator('button.button__icon-right').nth(2)
+        await locator.wait_for()
+        await locator.click()
+    return data[:top_n]
+
+@router.get("/club-rankings/{stat_type}")
+async def get_club_stats(stat_type: str, top_n: int | None = None, scraper: PlaywrightService = Depends(get_scraper)):
+    return await get_stats(scraper, 'clubs', stat_type, top_n)
+
+@router.get("/player-rankings/{stat_type}")
+async def get_player_stats(stat_type: str, top_n: int | None = None, scraper: PlaywrightService = Depends(get_scraper)):
+    return await get_stats(scraper, 'players', stat_type, top_n)
 
 @router.get("/club/all_time/{stat_type}")
 async def get_all_time_club_stats(stat_type: str, scraper: PlaywrightService = Depends(get_scraper)):

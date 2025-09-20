@@ -67,7 +67,6 @@ def format_stats(stats):
         if skip_cur: ## skip the numbers
             skip_cur = False
             continue
-        ## if the next element is a string and the one after is an int, we're at a heading
         elif stats[i] in set(stats_dict.keys()):
             cur_obj = stats[i]
             continue
