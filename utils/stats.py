@@ -35,3 +35,24 @@ async def get_stats(scraper, category, stat_type, top_n):
         await locator.wait_for()
         await locator.click()
     return {'stats': data[:top_n]}
+
+async def get_all_time_stats(scraper, category, stat_type, top_n):
+    page = await scraper.goto(f'/en/stats/all-time')
+    section_locator = page.locator("div.row").nth(0 if category == 'player' else 1)
+    await section_locator.wait_for()
+    while True:
+        section_data = await section_locator.all_inner_texts()
+        section_data = section_data[0].split("\n")
+        if not '\u200c' in section_data: ## fixes issue that comes up sporadically
+            break
+    idx = section_data.index(stat_type.title())
+    desired_data = section_data[idx+1:idx+31]
+    data_obj = {stat_type: []}
+    for i in range(0, len(desired_data), 3):
+        data_obj[stat_type].append({
+            category: desired_data[i+1],
+            'count': desired_data[i+2]
+        })
+        top_n -= 1
+        if top_n == 0: break ## make sure we only get the top n (up to 10) players
+    return data_obj
