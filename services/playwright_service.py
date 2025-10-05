@@ -33,7 +33,8 @@ class PlaywrightService:
     async def close(self):
         if self.browser:
             await self.browser.close()
-            await self.playwright.stop()
+            if self.playwright:
+                await self.playwright.stop()
             self.browser = None
             self.context = None
             self.page = None
