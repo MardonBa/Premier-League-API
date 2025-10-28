@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from .deps import get_scraper
 from services.playwright_service import PlaywrightService
-from utils.clubs import get_players_by_position, get_all_club_stats, format_stats
+from utils.clubs import get_players_by_position, get_all_club_stats
+from utils.utils import format_stats
 
 router = APIRouter(
     prefix="/clubs",

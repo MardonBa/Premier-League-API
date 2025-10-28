@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from .deps import get_scraper
-import asyncio
 from utils.table import parse_table
 
 router = APIRouter(

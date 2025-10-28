@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from .router import clubs, matches, players, stats, table
-from services.playwright_service import PlaywrightService
 from app.core import init_scraper, close_scraper
 
 app = FastAPI()
